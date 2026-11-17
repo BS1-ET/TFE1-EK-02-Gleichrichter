@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TFE 1 · Kurzanleitung Laborgeräte · IMOD und Oszilloskop TBS 1072C</title>
+<style>
+:root{--rot:#C62828;--tinte:#1a237e;--grau:#666;--gruen:#2e7d32;--gelb:#ffd600}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#e9e6df;color:#222}
+header{display:flex;align-items:center;gap:18px;padding:12px 22px;background:#fff;border-bottom:3px solid var(--rot)}
+header img{height:56px}
+header small{color:var(--rot);font-weight:bold;font-size:.8rem;display:block}
+header h1{margin:2px 0 0;font-size:1.3rem}
+.wrap{max-width:1150px;margin:16px auto;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.tabs{display:flex;flex-wrap:wrap;background:#37474f}
+.tabs button{background:none;border:0;color:#fff;padding:12px 18px;font-size:.95rem;cursor:pointer;border-bottom:4px solid transparent}
+.tabs button.akt{background:#263238;border-bottom-color:var(--rot)}
+.buehne{display:grid;grid-template-columns:1fr 330px;gap:0}
+@media(max-width:900px){.buehne{grid-template-columns:1fr}}
+.bild{position:relative;background:#111;align-self:start}
+.bild img{display:block;width:100%;height:auto}
+.hl{position:absolute;border:4px solid var(--gelb);border-radius:8px;box-shadow:0 0 0 3px rgba(0,0,0,.45),0 0 18px var(--gelb);opacity:0;animation:auf .5s ease forwards,puls 1.6s ease-in-out infinite}
+.hl b{position:absolute;top:-15px;left:-15px;width:28px;height:28px;border-radius:50%;background:var(--rot);color:#fff;font-size:.95rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.hl span{position:absolute;left:0;top:100%;margin-top:6px;background:rgba(0,0,0,.82);color:#fff;font-size:.78rem;padding:3px 7px;border-radius:4px;white-space:nowrap}
+.hl.oben span{top:auto;bottom:100%;margin:0 0 6px}
+@keyframes auf{from{opacity:0;transform:scale(1.4)}to{opacity:1;transform:scale(1)}}
+@keyframes puls{0%,100%{box-shadow:0 0 0 3px rgba(0,0,0,.45),0 0 6px var(--gelb)}50%{box-shadow:0 0 0 3px rgba(0,0,0,.45),0 0 26px var(--gelb)}}
+.text{padding:18px 20px;border-left:1px solid #ddd;display:flex;flex-direction:column}
+.text .nr{color:var(--rot);font-weight:bold;font-size:.85rem}
+.text h2{font-family:Georgia,serif;color:var(--tinte);margin:4px 0 10px;font-size:1.25rem}
+.text ol{padding-left:22px;margin:6px 0}.text li{margin:5px 0}
+.merke{background:#e3f2fd;border-left:5px solid #1565c0;padding:7px 10px;margin:10px 0;font-size:.9rem}
+.warn{background:#ffebee;border-left:5px solid var(--rot);padding:7px 10px;margin:10px 0;font-size:.9rem}
+.steuer{margin-top:auto;padding-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.steuer button{background:var(--rot);color:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:.95rem;cursor:pointer}
+.steuer button.sek{background:#555}
+.punkte{display:flex;gap:5px;flex-wrap:wrap;padding:10px 20px;background:#f5f5f5;border-top:1px solid #ddd}
+.punkte button{width:30px;height:30px;border-radius:50%;border:2px solid #90a4ae;background:#fff;cursor:pointer;font-size:.8rem}
+.punkte button.akt{background:var(--rot);color:#fff;border-color:var(--rot)}
+.punkte button.ges{background:#c8e6c9;border-color:var(--gruen)}
+kbd{background:#eee;border:1px solid #bbb;border-radius:4px;padding:0 5px;font-size:.85rem}
+footer{max-width:1150px;margin:0 auto 20px;color:var(--grau);font-size:.75rem;display:flex;justify-content:space-between;padding:0 4px}
+</style>
+</head>
+<body>
+<header>
+<img src="logo_technikerschule.jpg" alt="Technikerschule Bayreuth – Fahrzeugtechnik und Elektromobilität">
+<div><small>TFE 1 · Elektronik · Laborgeräte</small><h1>Kurzanleitung: hera IMOD und Oszilloskop Tektronix TBS 1072C</h1></div>
+</header>
+<div class="wrap">
+<div class="tabs" id="tabs"></div>
+<div class="buehne">
+<div class="bild" id="bild"><img id="foto" alt=""></div>
+<div class="text">
+<div class="nr" id="nr"></div>
+<h2 id="titel"></h2>
+<div id="inhalt"></div>
+<div class="steuer">
+<button class="sek" onclick="geh(-1)">◀ Zurück</button>
+<button onclick="geh(1)">Weiter ▶</button>
+<button class="sek" id="play" onclick="auto()">▶ Automatisch</button>
+</div>
+<div style="font-size:.75rem;color:#888;margin-top:6px">Tastatur: <kbd>←</kbd> <kbd>→</kbd> · Die gelben Rahmen zeigen die Reihenfolge der Bedienschritte.</div>
+</div>
+</div>
+<div class="punkte" id="punkte"></div>
+</div>
+<footer><span>Staatliche Technikerschule Bayreuth · Fachschule für Fahrzeugtechnik und Elektromobilität</span><span>Fotos: Elektrolabor der Schule</span></footer>
+<script>
+// Rahmen: [links %, oben %, Breite %, Höhe %, Beschriftung, 'oben' = Beschriftung über dem Rahmen]
+const K={
+dc:{t:"IMOD Netzteil DC",s:[
+{"i":"3982","h":"DC-Netzteil 1 (blau) einstellen","x":"<ol><li>Kachel <b>DC Supply 42V 6.0A</b> mit dem <b>blauen</b> Farbquadrat antippen: Das ist <b>Netzteil 1</b>.</li><li>Auf den Wert bei <b>V<sub>set</sub></b> tippen, Spannung eingeben, <b>Set</b>.</li><li>Auf den Wert bei <b>A<sub>set</sub></b> tippen, <b>Strombegrenzung</b> eingeben, <b>Set</b>.</li><li><b>Output</b> antippen: Ausgang ein.</li></ol><div class=\"merke\">Strombegrenzung immer knapp über den erwarteten Strom setzen, z. B. 0,30 A. <b>CV</b> = Konstantspannungsbetrieb. Erreicht der Strom A<sub>set</sub>, begrenzt das Netzteil den Strom.</div>","r":[[26,64.5,15.5,20,"Kachel DC 1 (blau)"],[32,30.5,8,5.5,"Vset"],[32,45.5,8,5.5,"Aset"],[10.5,57.5,9,7,"Output"]]},
+{"i":"3987","h":"Ausgang von Netzteil 1","x":"<ol><li>Netzteil 1 ist das Modul mit der <b>blauen</b> ACTIVE-LED.</li><li>Ausgang an den Buchsen <b>L+</b> (rot) und <b>L–</b> (schwarz).</li></ol><div class=\"merke\">Erst verdrahten, dann <b>Output</b> einschalten. Vor dem Umbau wieder ausschalten.</div>","r":[[10.5,20,5,7,"LED blau"],[16.5,72,14.5,9,"L– / L+"]]},
+{"i":"3987","h":"Netzteil 2 (hellblau)","x":"<ol><li>Das zweite Modul <b>DC Extended Range</b> (0–42 V / 0–6 A) hat die <b>hellblaue</b> ACTIVE-LED.</li><li>Sein Ausgang liegt ebenfalls an <b>L+</b> und <b>L–</b>.</li></ol><div class=\"merke\">Beide Netzteile sind voneinander unabhängig. So lassen sich zwei Spannungen gleichzeitig einstellen, z. B. 12 V Bordnetz und 5 V Sensorversorgung.</div>","r":[[38.5,19.5,5,7,"LED hellblau"],[44,72,13.5,9,"L– / L+"]]},
+{"i":"3982","h":"Netzteil 2: gleiche Bedienung","x":"<ol><li>Kachel <b>DC Supply 42V 6.0A</b> mit dem <b>hellblauen</b> Farbquadrat antippen.</li><li>Bedienung wie bei Netzteil 1: <b>V<sub>set</sub></b>, <b>A<sub>set</sub></b>, <b>Output</b>.</li></ol><div class=\"merke\">Prüfen Sie vor dem Einschalten an der Kopfzeile, welches Netzteil gerade geöffnet ist.</div>","r":[[41,64.5,15,20,"Kachel DC 2 (hellblau)"],[32,30.5,8,5.5,"Vset"],[32,45.5,8,5.5,"Aset"],[10.5,57.5,9,7,"Output"]]}
+]},
+ac:{t:"IMOD Netzteil AC",s:[
+{"i":"3984","h":"AC-Netzteil 0–230 V / 3 A","x":"<ol><li>Kachel <b>AC Supply 230V 3.0A</b> antippen.</li><li>Bei <b>V<sub>set</sub></b> die Spannung eingeben, <b>Set</b>.</li><li>Bei <b>A<sub>set</sub></b> die Strombegrenzung eingeben, <b>Set</b>.</li><li>Erst nach Freigabe durch die Lehrkraft <b>Output</b> antippen.</li></ol><div class=\"warn\"><b>Achtung Netzspannung:</b> Dieser Ausgang liefert bis 230 V. Im Elektronik-Labor nur Kleinspannung (V<sub>set</sub> ≤ 24 V) einstellen und vor dem Einschalten von der Lehrkraft prüfen lassen.</div>","r":[[72,58,15,14.5,"Kachel AC"],[33,26,8.5,5,"Vset"],[33,39.5,8.5,5,"Aset"],[13.5,51.5,8.5,6,"Output"]]},
+{"i":"3988","h":"AC-Ausgang am Function-Unit","x":"<ol><li>Ausgang über die Buchsen <b>L</b>, <b>N</b>, <b>PE</b> bzw. die Schutzkontaktsteckdose.</li><li>Die violette LED <b>ACTIVE</b> gehört zur Kachel AC Supply.</li></ol><div class=\"warn\">Schaltungen nur bei ausgeschaltetem Output umbauen. Die Masseklemme des Oszilloskops liegt am Schutzleiter. Messen am AC-Ausgang nur nach Anweisung der Lehrkraft.</div>","r":[[23,67.5,27.5,14.5,"L · N · PE"],[53,51.5,23.5,32,"Steckdose","oben"],[24,12,10,6,"LED violett"]]}
+]},
+fg:{t:"IMOD Funktionsgenerator",s:[
+{"i":"3987","h":"Das Funktionsgenerator-Modul","x":"<p>Der IMOD besteht aus der <b>Control-Unit</b> mit Touch-Display und mehreren <b>Function-Units</b> mit den Ausgangsbuchsen.</p><ol><li>Das Modul <b>IMOD FG</b> ist der Funktionsgenerator.</li><li>Seine <b>ACTIVE</b>-LED leuchtet <b>gelb</b>, genau wie das Farbquadrat der Kachel <b>Function Generator</b> am Display.</li></ol><div class=\"merke\">So sehen Sie sofort, welche Buchsen zu welcher Kachel gehören.</div>","r":[[64.5,13,25,71,"Funktionsgenerator"]]},
+{"i":"3990","h":"Funktionsgenerator öffnen","x":"<ol><li>Tippen Sie unten in der Kachelleiste auf <b>Function Generator</b>.</li><li>Die Kachel wird grün hinterlegt, oben erscheint das Menü des Generators.</li></ol><div class=\"merke\">Die Kachel zeigt auch im Hintergrund an, ob der Ausgang an ist (OFF oder eingestellte Werte).</div>","r":[[58,54.5,15,15.5,"Kachel antippen"],[13,13.5,75,5,"Menü Function Generator"]]},
+{"i":"3990","h":"Kurvenform wählen","x":"<p>Wählen Sie die Kurvenform mit den sechs Tasten:</p><ol><li>Sinus · Dreieck · Rechteck · Trapez</li><li>Sägezahn steigend · Sägezahn fallend</li></ol><p>Die gewählte Form ist grün hinterlegt und wird links als Kurve angezeigt.</p>","r":[[55.5,40,33,13.5,"Kurvenform"],[14,28,32,19,"Vorschau"]]},
+{"i":"3991","h":"Frequenz eingeben","x":"<ol><li>Tippen Sie auf den Wert hinter <b>Freq</b>. Rechts öffnet sich ein Ziffernblock.</li><li>Ziffern eingeben und die Einheit <b>Hz</b>, <b>kHz</b> oder <b>MHz</b> wählen.</li><li>Mit <b>OK</b> übernehmen, <b>Cancel</b> bricht ab.</li></ol><div class=\"merke\">Beispiel: 1 kHz → <kbd>1</kbd> und <kbd>kHz</kbd> → <kbd>OK</kbd></div>","r":[[21.5,22.5,18,6,"Freq antippen"],[80,25.5,7.5,17,"Einheit"],[69.5,48,8.5,5.5,"OK"]]},
+{"i":"3992","h":"Amplitude eingeben (Spitze-Spitze!)","x":"<ol><li>Tippen Sie auf den Wert hinter <b>Ampl</b>. Links öffnet sich der Ziffernblock.</li><li>Wert eingeben und mit <b>OK</b> bestätigen.</li></ol><div class=\"warn\">Die Amplitude wird als <b>V<sub>pp</sub></b> (Spitze-Spitze-Wert) eingegeben. 5 V<sub>pp</sub> bedeuten û = 2,5 V.</div><div class=\"merke\">Der Ausgang hat einen Innenwiderstand von 50 Ω. Prüfen Sie in Labor 1 mit dem Oszilloskop, ob der gemessene Wert zur Anzeige passt.</div>","r":[[65.5,20,14.5,6,"Ampl antippen"],[14,24,32,22,"Ziffern"],[36,47,10,5.5,"OK"]]},
+{"i":"3993","h":"Gleichanteil (Offset) einstellen","x":"<ol><li>Tippen Sie auf den Wert hinter <b>Offs</b>.</li><li>Wert eingeben, das Vorzeichen mit <b>+/-</b> umschalten.</li><li>Mit <b>OK</b> übernehmen.</li></ol><div class=\"merke\">Offset = Gleichanteil, um den die Kurve nach oben oder unten verschoben wird. Für Sinus zunächst <b>+00.000 V</b>. Ein Rechteck von 0 V bis 5 V stellen Sie so ein: Ampl. <b>5 V<sub>pp</sub></b> und Offset <b>+2,5 V</b>.</div>","r":[[63.5,24.5,15,6,"Offs antippen"],[25.5,40,9,5,"+/-"],[36.5,45.5,8.5,5,"OK"]]},
+{"i":"3995","h":"Rechteck: Tastverhältnis","x":"<p>Bei Rechteck erscheint zusätzlich <b>Duty</b> (Tastverhältnis in %), bei Trapez <b>Rise</b>.</p><ol><li>Rechteck-Taste wählen.</li><li>Auf den Wert hinter <b>Duty</b> tippen und eingeben, z. B. 25 %.</li></ol><div class=\"merke\">Tastverhältnis = Impulsdauer / Periodendauer. 50 % = symmetrisches Rechteck.</div>","r":[[72.5,38,8.5,6.5,"Rechteck"],[69.5,31.5,16,6,"Duty"]]},
+{"i":"3999","h":"Ausgang einschalten","x":"<ol><li>Erst alle Werte einstellen, dann die Schaltung anschließen.</li><li>Tippen Sie auf <b>Output</b>. Die Taste wird grün, der Ausgang ist aktiv.</li><li>Die Kachel zeigt jetzt Frequenz, Amplitude und Offset.</li></ol><div class=\"warn\">Vor jedem Umbau der Schaltung: <b>Output</b> erneut antippen, damit der Ausgang wieder aus ist.</div>","r":[[13.5,45.5,9.5,6.5,"Output"],[58.5,53.5,15.5,14,"Kachel: Werte"]]},
+{"i":"3987","h":"Anschluss am Function-Unit","x":"<ol><li><b>OUT</b> (BNC, R<sub>i</sub> = 50 Ω): Signalausgang. BNC-Kabel bzw. BNC-Adapter auf 4-mm-Buchsen verwenden.</li><li><b>TTL OUT</b>: Rechtecksignal mit TTL-Pegel in gleicher Frequenz, z. B. als Takt.</li><li><b>COUNTER IN</b>: Eingang für den Frequenzzähler (Taste <b>Count</b>).</li></ol><div class=\"merke\">Der Außenleiter der BNC-Buchse ist die Bezugsmasse des Signals.</div>","r":[[81.5,30,8,9,"OUT 50 Ω"],[80.5,47.5,8,8,"TTL OUT"],[80,63.5,8,9,"COUNTER IN"]]}
+]},
+os:{t:"Oszilloskop TBS 1072C",s:[
+{"i":"4004c","h":"Einschalten","x":"<p>Der Netzschalter sitzt auf der <b>linken Gehäuseseite</b> (blaues Seitenteil), Symbol I/O.</p><ol><li>Schalter drücken.</li><li>Startbildschirm abwarten, bis das Raster erscheint.</li></ol>","r":[[52,34,11,19.5,"Netzschalter"]]},
+{"i":"4007","h":"Das Bedienfeld im Überblick","x":"<ol><li><b>Seitentasten</b> rechts neben dem Bildschirm wählen die Menüpunkte.</li><li><b>Multipurpose-Knopf</b>: drehen = Wert ändern, drücken = auswählen.</li><li><b>Vertical</b>: Y-Ablenkung je Kanal (gelb = CH1, blau = CH2).</li><li><b>Horizontal</b>: Zeitablenkung.</li><li><b>Trigger</b>: Auslöser für ein stehendes Bild.</li><li><b>Eingänge</b> CH1, CH2, Aux In.</li></ol>","r":[[53.5,27.5,5,34,"Seitentasten"],[59.5,20.5,9.5,12.5,"Multipurpose"],[58.5,35,23,25,"Vertical"],[82,35,6.5,25,"Horizontal"],[89,35,6.5,25,"Trigger"],[63,63.5,26.5,9,"Eingänge"]]},
+{"i":"4007","h":"Grundeinstellung laden","x":"<p>Vor jeder neuen Messung:</p><ol><li><b>Default Setup</b> drücken: Werkseinstellung, alte Einstellungen werden gelöscht.</li><li>Sprache prüfen: <b>Utility</b> → Seitentaste <b>Sprache</b> → Deutsch.</li></ol>","r":[[82.5,24.5,6.5,5,"Default Setup","oben"],[82.5,30,6.5,4,"Utility"]]},
+{"i":"4007","h":"Tastkopf anschließen und abgleichen","x":"<ol><li>Tastkopf an <b>CH1</b> (gelb) anschließen.</li><li>Tastkopfspitze an <b>Probe Comp ~5 V</b>, Masseklemme an den Masseanschluss darunter.</li><li><b>Autoset</b> drücken: Es erscheint ein Rechteck 5 V / 1 kHz.</li><li>Ecken nicht rund und nicht überschwingend? Sonst Trimmer am Tastkopf nachstellen.</li></ol><div class=\"warn\">Max. 300 V an den Eingängen (CAT II). Die Masseklemme ist mit dem Schutzleiter verbunden: nie an ein spannungsführendes Potenzial anklemmen.</div>","r":[[63.5,64,6,7,"CH1"],[90.5,65.5,4,7.5,"Probe Comp"],[89.5,30,5.5,4,"Autoset"]]},
+{"i":"4014g","h":"Tastkopfdämpfung einstellen","x":"<ol><li>Taste <b>1</b> (Menu) drücken: Kanalmenü CH1.</li><li>Seitentaste <b>Tastkopfeinstellung</b> drücken.</li><li>Im Fenster wird die <b>Dämpfung</b> angezeigt (z. B. 10X).</li><li>Mit dem <b>Multipurpose-Knopf</b> einstellen: drehen bis <b>1X</b> (bzw. 10X), dann den Knopf drücken, um zu übernehmen.</li></ol><div class=\"merke\"><b>Standard im Labor:</b> Mit der Messleitung aus dem Labor (BNC auf 4-mm-Stecker, ohne Tastkopf) gilt der Faktor <b>1X</b> (1:1).</div><div class=\"warn\">Die Einstellung muss zur Messleitung bzw. zum Schalter am Tastkopf passen. Sonst ist jede Spannungsanzeige um den Faktor 10 falsch.</div>","r":[[64.6,47.5,5.3,9,"Menu 1"],[54.3,41.4,3.7,7.4,"Seitentaste"],[38.6,40.8,5.8,8.3,"Dämpfung"],[60.3,11,9.1,16.6,"Multipurpose: drehen/drücken"]]},
+{"i":"4016g","h":"Kopplung DC / AC","x":"<ol><li>Im Kanalmenü die Seitentaste <b>Kopplung</b> drücken.</li><li><b>DC</b>: Signal mit Gleichanteil. <b>AC</b>: Gleichanteil wird abgetrennt.</li></ol><div class=\"merke\">Für Gleichrichter-Messungen immer <b>DC</b>. Sonst sehen Sie den Mittelwert nicht.</div>","r":[[43.9,33,6.8,9.2,"Kopplung"],[21.4,38.4,12.6,12.7,"DC / AC"]]},
+{"i":"4011g","h":"Vertikal: Volt pro Kästchen","x":"<ol><li><b>Scale</b> (gelb) drehen: Volt pro Teilung (div) für CH1.</li><li><b>Position</b> (gelb) drehen: Nulllinie verschieben.</li><li>Der eingestellte Wert steht unten links, z. B. <b>CH1 2.00 V</b>.</li></ol><div class=\"merke\">û = Anzahl Teilungen × V/div. Bild so groß wie möglich einstellen, ohne dass es oben oder unten abgeschnitten wird.</div>","r":[[64.2,58.1,7.4,14.7,"Scale"],[65,38.8,5.8,8.3,"Position","oben"],[4.2,65.4,10.5,6.1,"CH1 V/div","oben"]]},
+{"i":"4011g","h":"Horizontal: Zeit pro Kästchen","x":"<ol><li><b>Scale</b> im Feld Horizontal drehen: Zeit pro Teilung.</li><li>Der Wert steht unten in der Mitte, z. B. <b>200 µs</b>.</li></ol><div class=\"merke\">T = Anzahl Teilungen × s/div, f = 1 / T. Zwei bis drei Perioden auf dem Bildschirm sind ideal. Bei 50 Hz (T = 20 ms) z. B. 5 ms/div.</div>","r":[[83.4,58.9,7.4,14.7,"Scale"],[23.6,66.2,5.8,5.9,"s/div","oben"]]},
+{"i":"4039","h":"Trigger: stehendes Bild","x":"<ol><li>Im Feld Trigger <b>Menu</b> drücken.</li><li><b>Quelle</b>: Kanal, auf den getriggert wird (meist CH1).</li><li><b>Pegel</b>: Spannung, bei der ausgelöst wird.</li><li><b>Anstieg</b>: steigende oder fallende Flanke.</li></ol><div class=\"merke\">Läuft das Bild durch, stimmt Quelle oder Pegel nicht.</div>","r":[[70.5,35.5,7.5,6.5,"Quelle"],[70.5,45.5,7.5,6.5,"Pegel"],[70.5,55.5,7.5,8,"Anstieg"]]},
+{"i":"4040","h":"Trigger-Pegel schnell setzen","x":"<ol><li><b>Level</b> drehen: Pegel ändern (orange Marke am rechten Bildrand).</li><li><b>Level drücken</b>: Pegel automatisch auf 50 % des Signals.</li><li><b>Force Trig</b>: einmalig auslösen, wenn nichts erscheint.</li></ol>","r":[[71,50.5,13,15,"Level"],[70,36,14,9,"Trigger Menu"],[66,70,16,9,"Force Trig"]]},
+{"i":"4037","h":"Autoset, Run/Stop, Single","x":"<ol><li><b>Autoset</b>: Gerät stellt V/div, s/div und Trigger selbst ein. Gut zum Start, danach selbst nachstellen.</li><li><b>Run/Stop</b>: grün = läuft, rot = Bild eingefroren.</li><li><b>Single</b>: genau eine Aufnahme, z. B. für den Abschaltimpuls einer Relaisspule.</li></ol>","r":[[79,24.5,7,4.5,"Autoset"],[79,9,7.5,5,"Run/Stop","oben"],[79,16.5,7.5,4.5,"Single"]]},
+{"i":"4038","h":"Cursor-Messung","x":"<ol><li>Taste <b>Cursor</b> drücken.</li><li>Seitentaste <b>Zeit</b> (senkrechte Linien) oder <b>Amplitude</b> (waagrechte Linien) wählen.</li><li>Cursor mit dem Multipurpose-Knopf verschieben, Knopf drücken = anderen Cursor wählen.</li><li>Ablesen: <b>Δt</b> bzw. <b>ΔV</b>.</li></ol><div class=\"merke\">Periodendauer: Cursor auf zwei gleiche Punkte aufeinander folgender Perioden setzen, f = 1 / Δt.</div>","r":[[80,27.5,11,11,"Zeit"],[45.5,29.5,8,5,"Δt"],[80,39.5,11,9.5,"Amplitude"]]},
+{"i":"4007","h":"Automatische Messungen","x":"<ol><li>Taste <b>Measure</b> drücken.</li><li>Mit den Seitentasten den Kanal wählen, mit dem Multipurpose-Knopf die Messgröße suchen, z. B. <b>Frequenz</b>, <b>Spitze-Spitze</b>, <b>Mittelwert</b>, <b>Effektivwert (RMS)</b>.</li><li>Knopf drücken: Der Messwert erscheint am Bildschirm. Die Hinweiszeile oben am Bildschirm (HelpEverywhere) erklärt jeden Schritt.</li></ol><div class=\"merke\">Automatische Werte immer mit der Ablesung am Raster vergleichen. Das ist die Kontrolle Ihrer Messung.</div>","r":[[75.5,19.5,6,4,"Measure"],[59.5,20.5,9.5,12.5,"Multipurpose"]]}
+]},
+la:{t:"Schnellstart Funktionsgeneratormessung",s:[
+{"i":"3990","h":"1 · Generator einstellen","x":"<ol><li>IMOD: Kachel <b>Function Generator</b>.</li><li>Sinus, <b>1 kHz</b>, <b>8 V<sub>pp</sub></b> (das sind û = 4 V), Offset 0 V.</li><li>Noch <b>nicht</b> einschalten.</li></ol>","r":[[55.5,40,9,6.5,"Sinus"],[21,22,19,6.5,"1 kHz"],[65,21.5,14.5,6,"8 Vpp"]]},
+{"i":"4007","h":"2 · Oszilloskop vorbereiten","x":"<ol><li>Einschalten, <b>Default Setup</b>.</li><li>Tastkopf an CH1, Schalter am Tastkopf auf <b>1X</b>, im Kanalmenü Dämpfung <b>1X</b>.</li><li>Kopplung <b>DC</b>.</li></ol>","r":[[82.5,24.5,6.5,5,"Default Setup"],[63.5,64,6,7,"CH1"],[64.3,45.5,4.8,5,"Menu 1"]]},
+{"i":"3987","h":"3 · Verbinden","x":"<ol><li>Tastkopfspitze an den Innenleiter von <b>OUT</b>, Masseklemme an den Außenleiter (BNC-Adapter verwenden).</li><li>Dann <b>Output</b> einschalten.</li></ol>","r":[[81.5,30,8,9,"OUT"]]},
+{"i":"4011g","h":"4 · Einstellen und ablesen","x":"<ol><li>V/div so wählen, dass das Bild möglichst groß, aber vollständig ist (hier 1 V/div).</li><li>s/div so wählen, dass 2–3 Perioden sichtbar sind (hier 0,2 ms/div).</li><li>Trigger auf CH1, Pegel mit <b>Level drücken</b> auf 50 %.</li><li>û, u<sub>ss</sub>, T und f am Raster ablesen und ins Messprotokoll eintragen.</li></ol>","r":[[64.2,58.1,7.4,14.7,"V/div"],[83.4,58.9,7.4,14.7,"s/div"],[91.3,48.8,6.9,10.7,"Level","oben"]]},
+{"i":"4038","h":"5 · Kontrollieren","x":"<ol><li>Ablesung mit Cursor (Δt) und Measure (Frequenz, Spitze-Spitze) vergleichen.</li><li>Passt die gemessene Amplitude zur Generatoranzeige? Abweichung begründen (Innenwiderstand 50 Ω, Tastkopf, Ablesefehler).</li><li>Zum Schluss: <b>Output</b> am IMOD aus.</li></ol>","r":[[80,27.5,11,11,"Cursor Zeit"],[45.5,29.5,8,5,"Δt"]]}
+]},
+mm:{t:"Multimeter ICOM",s:[
+{"i":"3986","h":"Multimeter ICOM im Überblick","x":"<ol><li><b>Netzschalter</b> links einschalten.</li><li>Am <b>Touch-Display</b> Messgröße und Messart wählen.</li><li>Messleitungen an die <b>Buchsen</b> rechts anschließen.</li></ol><div class=\"warn\">Max. 1000 V DC / 700 V AC an V/Ω/F, Messkategorie <b>CAT II 600 V</b>. Im Labor messen Sie nur Kleinspannung.</div>","r":[[3,42.5,6,14.5,"Netzschalter"],[15,25.5,38,32,"Display"],[82,24.5,6.5,44.5,"Buchsen"]]},
+{"i":"3985","h":"Gleichspannung messen","x":"<ol><li>Messgröße <b>V</b> antippen.</li><li>Messart <b>DC</b> wählen.</li><li>Messwert oben ablesen.</li></ol><div class=\"merke\">Bei einer pulsierenden Spannung (Gleichrichter) zeigt <b>DC</b> den <b>arithmetischen Mittelwert</b> an, also den Gleichrichtwert U<sub>AV</sub>.</div>","r":[[24,48.5,7.5,6.5,"V"],[49.5,33.5,6.5,5,"DC"],[26,33,21.5,8,"Messwert","oben"]]},
+{"i":"3986","h":"Spannungsmessung anschließen","x":"<ol><li>Rote Messleitung an <b>V/Ω/F</b>, schwarze an <b>COM</b>.</li><li>Das Multimeter <b>parallel</b> zum Bauteil anschließen.</li></ol><div class=\"merke\">Rot an den Punkt mit dem höheren Potenzial, sonst zeigt die Anzeige ein Minuszeichen.</div>","r":[[82.5,25.5,5,7,"V/Ω/F","oben"],[82.5,34.5,5,7,"COM"]]},
+{"i":"3985","h":"DC, AC oder AC+DC?","x":"<ol><li><b>DC</b>: Gleichanteil (arithmetischer Mittelwert).</li><li><b>AC</b>: Effektivwert nur des Wechselanteils.</li><li><b>AC+DC</b>: Effektivwert des gesamten Signals.</li></ol><div class=\"merke\">Für Gleichrichter gilt: U<sub>AC+DC</sub><sup>2</sup> = U<sub>DC</sub><sup>2</sup> + U<sub>AC</sub><sup>2</sup>. Messen Sie alle drei Werte und vergleichen Sie mit der Rechnung.</div>","r":[[49.5,33.5,6.5,5,"DC"],[49.5,41.5,6.5,4.5,"AC"],[49.5,49,6.5,4.5,"AC+DC"]]},
+{"i":"3986","h":"Strom messen","x":"<ol><li>Am Display <b>mA</b> oder <b>A</b> wählen.</li><li>Messleitung von <b>µA/mA</b> (bis 500 mA) oder <b>A</b> (bis 20 A) nach <b>COM</b>.</li><li>Stromkreis öffnen und das Multimeter <b>in Reihe</b> schalten.</li></ol><div class=\"warn\">Nie in den Strombuchsen eine Spannung messen: Das ist ein Kurzschluss über das Messgerät. Nach der Strommessung die Leitung sofort wieder auf V/Ω/F stecken.</div>","r":[[82.5,43,5.5,7.5,"µA/mA"],[82.5,52,5.5,7,"A"],[82.5,34.5,5,7,"COM","oben"]]},
+{"i":"3985","h":"Widerstand, Diode, Durchgang, Kapazität","x":"<ol><li><b>Ω</b>: Widerstand · <b>F</b>: Kapazität.</li><li><b>Diodensymbol</b>: Durchlassspannung einer Diode (ca. 0,5–0,7 V bei Silizium).</li><li><b>Lautsprechersymbol</b>: Durchgangsprüfung mit Ton.</li><li>Anschluss jeweils an <b>V/Ω/F</b> und <b>COM</b>.</li></ol><div class=\"warn\">Nur an spannungsfreien Bauteilen messen. Kondensatoren vorher entladen.</div>","r":[[24,57,7.5,5.5,"Ω"],[32.5,57,7,5.5,"F"],[40.5,57,7.5,5.5,"Diode"],[24,65,7.5,5.5,"Durchgang"]]},
+{"i":"3985","h":"Frequenz, Messbereich, Verlauf","x":"<ol><li><b>Hz</b>: Frequenzmessung, Eingang an der grauen Buchse <b>Hz</b>.</li><li><b>Range &amp; Graph</b>: zeigt den Messbereich (hier <b>Auto 5 V</b>). Antippen öffnet die Einstellung von Bereich und Grafik.</li><li>Rechts wird der <b>Verlauf</b> des Messwerts aufgezeichnet: Y = Skalierung, X = Zeitachse (hier 60 s).</li></ol><div class=\"merke\">Der Verlauf eignet sich z. B. zum Beobachten, wie eine Spannung beim Laden eines Kondensators ansteigt.</div>","r":[[32.5,65,7,5.5,"Hz"],[49.5,54.5,6.5,9,"Range & Graph"],[56.5,31.5,25.5,38,"Verlauf","oben"]]}
+]},
+};
+let tab='dc',n=0,timer=null;
+const tabs=document.getElementById('tabs');
+for(const k in K){const b=document.createElement('button');b.textContent=K[k].t;b.id='t_'+k;b.onclick=()=>{tab=k;n=0;stop();zeige()};tabs.appendChild(b)}
+function zeige(){
+ const S=K[tab].s,s=S[n];
+ for(const k in K)document.getElementById('t_'+k).classList.toggle('akt',k===tab);
+ const f=document.getElementById('foto');f.src='img/'+s.i+'.jpg';f.alt=s.h;
+ document.querySelectorAll('.hl').forEach(e=>e.remove());
+ s.r.forEach((r,j)=>{const d=document.createElement('div');d.className='hl'+(r[5]?' '+r[5]:'');
+  d.style.cssText=`left:${r[0]}%;top:${r[1]}%;width:${r[2]}%;height:${r[3]}%;animation-delay:${j*0.9}s,${j*0.9+0.5}s`;
+  d.innerHTML=`<b>${j+1}</b><span>${r[4]}</span>`;document.getElementById('bild').appendChild(d)});
+ document.getElementById('nr').textContent=`${K[tab].t} · Schritt ${n+1} von ${S.length}`;
+ document.getElementById('titel').textContent=s.h;
+ document.getElementById('inhalt').innerHTML=s.x;
+ const p=document.getElementById('punkte');p.innerHTML='';
+ S.forEach((_,j)=>{const b=document.createElement('button');b.textContent=j+1;b.className=j===n?'akt':(j<n?'ges':'');b.onclick=()=>{n=j;zeige()};p.appendChild(b)});
+}
+function geh(d){const L=K[tab].s.length;n=(n+d+L)%L;zeige()}
+function stop(){clearInterval(timer);timer=null;document.getElementById('play').textContent='▶ Automatisch'}
+function auto(){if(timer){stop();return}timer=setInterval(()=>geh(1),9000);document.getElementById('play').textContent='⏸ Anhalten'}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')geh(1);if(e.key==='ArrowLeft')geh(-1)});
+const q=location.hash.slice(1);if(K[q])tab=q;
+zeige();
+</script>
+</body>
+</html>
